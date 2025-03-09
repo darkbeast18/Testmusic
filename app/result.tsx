@@ -3,23 +3,41 @@ import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-
-export default function SongResult() {
-  // Sample song data (in a real app, this would come from an API or props)
-  const songData = {
-    title: "Vazhithunaiye (From \"Dragon\")",
-    artists: "Leon James, Sid Sriram, Sanjana Kalmanje & Vignesh Shivan",
-    album: "Vazhithunaiye (From \"Dragon\") - Single",
-    label: "Think Music",
-    releaseYear: "2025",
-    coverArt: "/album-cover.jpg" // In a real app, this would be a dynamic path
+interface ResultData {
+  result?: {
+    title?: string;
+    subtitle?: string;
+    album?: string;
+    label?: string;
+    releaseYear?: string;
+    images?: {
+      coverarthq?: string;
+    };
   };
+}
 
-  const [isLoaded, setIsLoaded] = useState(false);
+
+interface SongResultProps {
+  result: ResultData | null;
+}
+
+export default function SongResult({ result }: SongResultProps) {
+  if (!result) return <p>No song data available.</p>;
+
+  const songData = {
+    title: result?.result?.title || "Unknown Title",
+    artists: result?.result?.subtitle || "Unknown Artist",
+    album: result?.result?.album || "Unknown Album",
+    label: result?.result?.label || "Unknown Label",
+    releaseYear: result?.result?.releaseYear || "Unknown Year",
+    coverArt: result?.result?.images?.coverarthq || "/default-cover.jpg",
+};
+ 
 
   useEffect(() => {
-    setIsLoaded(true);
-  }, []);
+    console.log("Received Result Data in Result Component:", result);
+  }, [result]);
+  console.log(result);
 
   return (
     <div className=" absolute z-10 min-h-screen bg-gradient-to-b from-gray-900 to-black text-white font-serif">
@@ -30,44 +48,46 @@ export default function SongResult() {
       </Head>
 
       <main className="container mx-auto px-4 py-12 max-w-5xl">
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: isLoaded ? 1 : 0 }}
-          transition={{ duration: 0.8 }}
-          className="mb-6"
-        >
+      {/* <motion.div 
+   initial={{ opacity: 0 }}
+   animate={{ opacity: 1 }}
+   transition={{ duration: 0.8 }}
+   className="mb-6"
+> */}
+
           <div className="inline-block py-1 px-3 bg-emerald-700 text-emerald-100 rounded-full text-sm mb-8">
             Song Detected!
           </div>
-        </motion.div>
+        {/* </motion.div> */}
 
         <div className="grid md:grid-cols-2 gap-12">
           <motion.div 
             initial={{ x: -50, opacity: 0 }}
-            animate={{ x: isLoaded ? 0 : -50, opacity: isLoaded ? 1 : 0 }}
+            animate={{ x:  -50, opacity:  0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
             className="aspect-square relative rounded-lg overflow-hidden shadow-2xl"
           >
-            <div className="absolute inset-0 bg-black/30 z-10"></div>
-            <div className="absolute bottom-4 left-4 z-20">
-              <div className="text-xs uppercase tracking-widest text-gray-300 mb-1">A Leon James Musical</div>
-              <div className="text-lg font-bold">DRAGON</div>
-            </div>
-            <Image 
-              src="/album-cover.jpg"
-              alt={songData.title}
-              className="object-cover transform hover:scale-105 transition-transform duration-700"
-              fill
-              priority
-            />
+            {songData && (
+    <Image 
+        src={songData.coverArt}
+        alt={songData.title}
+        className="object-cover transform hover:scale-105 transition-transform duration-700"
+        width={300}
+        height={300}
+        priority
+    />
+)}
+
+
+         
           </motion.div>
 
           <motion.div 
-            initial={{ x: 50, opacity: 0 }}
-            animate={{ x: isLoaded ? 0 : 50, opacity: isLoaded ? 1 : 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="flex flex-col justify-center"
-          >
+   initial={{ x: -50, opacity: 0 }}
+   animate={{ x: 0, opacity: 1 }}
+   transition={{ duration: 0.6, delay: 0.2 }}
+>
+
             <h1 className="font-serif text-4xl md:text-5xl font-bold mb-3 text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-yellow-400">
               {songData.title}
             </h1>

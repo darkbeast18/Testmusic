@@ -90,14 +90,6 @@ function SongLinks({
   );
 }
 
-const SearchResults = ({ result }: { result: any }) => {
-  return (
-    <div>
-      {result && <Result result={result} />}
-    </div>
-  );
-};
-
 
 export default function AudioRecognition() {
   const [file, setFile] = useState<File | null>(null);
@@ -361,13 +353,13 @@ export default function AudioRecognition() {
   return (
     <div className="bg-black h-screen">
       <Search1 />
-      <div className="text-white pl-[160px] text-4xl font-bold flex flex-row items-center gap-2">
+      <div className="text-white pl-[160px] pt-[80px] pb-[30px] text-4xl font-bold flex flex-row items-center gap-2">
         <h1 className="text-white text-4xl font-bold pr-[300px]">
           Name Songs in
           <br />
           <span className="mt-1 block">seconds</span>
         </h1>
-        <img src={Image.src} alt="Meditation" className="w-[400px] h-[230px]" />
+        <img src={Image.src} alt="Meditation" className="w-[480px] h-[280px]" />
       </div>
 
       {/* Upload & Record Section */}

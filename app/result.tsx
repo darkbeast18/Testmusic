@@ -3,6 +3,15 @@ import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
+import AppleMusic from"@/app/result/AppleMusicIcon.svg";
+import AmazonMusic from"@/app/result/AmazonMusicIcon.svg";
+import JioMusic from"@/app/result/JioSaavanIconIcon.svg";
+import Gaana from"@/app/result/GaanaIcon.svg";
+interface Provider {
+  type: string;
+  uri: string;
+}
+
 interface ResultData {
   result?: {
     title?: string;
@@ -13,6 +22,16 @@ interface ResultData {
     images?: {
       coverarthq?: string;
     };
+    metadata?: {
+      text: string;
+      title: string;
+    }[];
+    urls?: {
+      spotify?: string;
+      deezer?: string;
+      youtubeMusic?: string;
+    };
+    providers?: Provider[];
   };
 }
 
@@ -24,46 +43,124 @@ interface SongResultProps {
 export default function SongResult({ result }: SongResultProps) {
   if (!result) return <p>No song data available.</p>;
 
-  const songData = {
+  const metadata = result?.result?.metadata || [];
+const getMetadataValue = (title: string): string =>
+  metadata.find((item) => item.title === title)?.text || "Unknown";
+
+const songData = {
     title: result?.result?.title || "Unknown Title",
     artists: result?.result?.subtitle || "Unknown Artist",
-    album: result?.result?.album || "Unknown Album",
-    label: result?.result?.label || "Unknown Label",
-    releaseYear: result?.result?.releaseYear || "Unknown Year",
+    album: getMetadataValue("Album"),
+    label: getMetadataValue("Label"),
+    releaseYear: getMetadataValue("Released"),
     coverArt: result?.result?.images?.coverarthq || "/default-cover.jpg",
+    spotifyLink: result?.result?.providers?.find(p => p.type === "SPOTIFY")?.uri || "",
+    deezerLink: result?.result?.providers?.find(p => p.type === "DEEZER")?.uri || "",
+    youtubeMusicLink: result?.result?.providers?.find(p => p.type === "YOUTUBEMUSIC")?.uri || "",
+
 };
+
  
 
   useEffect(() => {
     console.log("Received Result Data in Result Component:", result);
   }, [result]);
-  console.log(result);
 
+
+  const generateSearchLink = (platform: string, songName: string, artistName: string): string => {
+    const encodedSong = encodeURIComponent(songName);
+    const encodedArtist = encodeURIComponent(artistName);
+    const query = encodeURIComponent(`${songName} ${artistName}`);
+    switch (platform.toLowerCase()) {
+      case "spotify":
+        return `https://open.spotify.com/search/${encodedSong}%20${encodedArtist}`;
+      case "youtube":
+        return `https://www.youtube.com/results?search_query=${encodedSong}%20${encodedArtist}`;
+      case "apple music":
+        return `https://music.apple.com/us/search?term=${encodedSong}%20${encodedArtist}`;
+      case "amazon music":
+        return `https://music.amazon.com/search/${encodedSong}%20${encodedArtist}`;
+      case "jiosaavn":
+        return `https://www.google.com/search?q=${query}+site:jiosaavn.com`;
+      case "gaana":
+        return `https://gaana.com/search/${encodedSong}`;
+      case "deezer":
+        return `https://www.deezer.com/search/${encodedSong}%20${encodedArtist}`;
+      default:
+        return "#"; // Fallback for unsupported platforms
+    }
+  };
+  
+  const platforms = [
+    { name: "Spotify", icon: "spotify" },
+    { name: "YouTube", icon: "youtube" },
+    { name: "Deezer", icon: "deezer" },
+    { name: "Apple Music", icon: "apple" },
+    { name: "Amazon", icon: "amazon" },
+    { name: "Gaana", icon: "gaana" },
+    { name: "JioSaavan", icon: "jiosaavan" },
+    //{ name: "Wynk", icon: "wynk" }
+  ];
+  
+  function SongLinks({
+    songName,
+    artistName,
+  }: {
+    songName: string;
+    artistName: string;
+  }) {
+    const platforms = [ 'Amazon Music', 'Apple Music', 'Jiosaavn','Gaana' ];
+    const platformIcons: Record<string, JSX.Element> = {
+      "amazon music": <AmazonMusicIcon  />,
+      "apple music": <AppleMusicIcon />,
+      jiosaavn: <JioSaavanIcon  />,
+      gaana: <GaanaIcon />,
+    };
+    
+    return (
+      <div className=" z-50 flex flex-wrap gap-6 mt-4 items-center justify-center">
+        {platforms.map((platform) => (
+          <a
+            key={platform}
+            href={generateSearchLink(platform, songName, artistName)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-gradient-to-b from-gray-900 to-black hover:from-orange-400 hover:to-orange-500 font-medium text-xl text-white rounded-md capitalize px-7 py-4 flex items-center gap-2 transition-colors"
+          >
+            {platformIcons[platform.toLowerCase()]} {/* Display Icon */}
+            {platform} {/* Platform Name */}
+          </a>
+        ))}
+      </div>
+    );
+    
+    
+  }
   return (
-    <div className=" absolute z-10 min-h-screen bg-gradient-to-b from-gray-900 to-black text-white font-serif">
+    <div className="min-h-screen w-full bg-gradient-to-b from-gray-900 to-black text-white font-serif">
       <Head>
         <title>{songData.title} | Music Discovery</title>
         <meta name="description" content={`Song details for ${songData.title} by ${songData.artists}`} />
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;500&display=swap" />
       </Head>
 
-      <main className="container mx-auto px-4 py-12 max-w-5xl">
-      {/* <motion.div 
+      <main className="container mx-auto  py-10 max-w-7xl">
+      <motion.div 
    initial={{ opacity: 0 }}
    animate={{ opacity: 1 }}
    transition={{ duration: 0.8 }}
    className="mb-6"
-> */}
+>
 
           <div className="inline-block py-1 px-3 bg-emerald-700 text-emerald-100 rounded-full text-sm mb-8">
             Song Detected!
           </div>
-        {/* </motion.div> */}
+        </motion.div>
 
         <div className="grid md:grid-cols-2 gap-12">
           <motion.div 
             initial={{ x: -50, opacity: 0 }}
-            animate={{ x:  -50, opacity:  0 }}
+            animate={{ x:  0, opacity:  1 }}
             transition={{ duration: 0.6, delay: 0.2 }}
             className="aspect-square relative rounded-lg overflow-hidden shadow-2xl"
           >
@@ -71,9 +168,9 @@ export default function SongResult({ result }: SongResultProps) {
     <Image 
         src={songData.coverArt}
         alt={songData.title}
-        className="object-cover transform hover:scale-105 transition-transform duration-700"
-        width={300}
-        height={300}
+        className=" transform hover:scale-105 transition-transform duration-700"
+        width={650}
+        height={750}
         priority
     />
 )}
@@ -92,27 +189,65 @@ export default function SongResult({ result }: SongResultProps) {
               {songData.title}
             </h1>
             
-            <p className="text-lg text-gray-300 mb-8">{songData.artists}</p>
+            <p className="text-xl text-gray-300 mb-8">{songData.artists}</p>
             
             <div className="grid grid-cols-2 gap-6 mb-12">
               <div>
-                <h3 className="text-xs uppercase tracking-wider text-gray-400 mb-2">Album</h3>
-                <p className="font-medium text-gray-200">{songData.album}</p>
+                <h3 className="text-lg uppercase tracking-wider text-gray-400 mb-2">Album</h3>
+                <p className="font-medium text-base text-gray-200">{songData.album}</p>
               </div>
               
               <div>
-                <h3 className="text-xs uppercase tracking-wider text-gray-400 mb-2">Label</h3>
-                <p className="font-medium text-gray-200">{songData.label}</p>
+                <h3 className="text-lg uppercase tracking-wider text-gray-400 mb-2">Label</h3>
+                <p className="font-medium text-base text-gray-200">{songData.label}</p>
               </div>
               
               <div>
-                <h3 className="text-xs uppercase tracking-wider text-gray-400 mb-2">Released</h3>
-                <p className="font-medium text-gray-200">{songData.releaseYear}</p>
+                <h3 className="text-lg uppercase tracking-wider text-gray-400 mb-2">Released</h3>
+                <p className="font-medium text-base text-gray-200">{songData.releaseYear}</p>
               </div>
             </div>
             
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-              <button className="px-4 py-3 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 rounded-md transition-all duration-300 flex items-center justify-center gap-2 shadow-lg">
+               {songData.spotifyLink && (
+              <a href={songData.spotifyLink} target="_blank" rel="noopener noreferrer" className="w-48">
+          <button className="w-full px-4 py-3  bg-gradient-to-b from-gray-900 to-black hover:from-orange-400 hover:to-orange-500 rounded-md transition-all duration-300 flex items-center justify-center gap-2 shadow-lg">
+          <SpotifyIcon />
+          <span className="font-medium text-xl">Spotify</span>
+            </button>
+            </a>
+            )}
+
+          {songData.youtubeMusicLink && (
+          <a 
+            href={songData.youtubeMusicLink} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="w-48"
+            >
+          <button className="w-full px-4 py-3 bg-gradient-to-b from-gray-900 to-black  hover:from-orange-400 hover:to-orange-500 rounded-md transition-all duration-300 flex items-center justify-center gap-2 shadow-lg">
+        <YouTubeIcon />
+          <span className="font-medium text-xl">YouTube</span>
+        </button>
+        </a>
+        )}
+        {songData.deezerLink && (
+  <a 
+    href={songData.deezerLink} 
+    target="_blank" 
+    rel="noopener noreferrer"
+    className="w-48"
+  >
+    <button className="w-full px-4 py-3 bg-gradient-to-b from-gray-900 to-black hover:from-orange-400 hover:to-orange-500 rounded-md transition-all duration-300 flex items-center justify-center gap-2 shadow-lg">
+      <DeezerIcon />
+      <span className="font-medium text-xl">Deezer</span>
+    </button>
+  </a>
+)}
+
+
+
+              {/* <button className="px-4 py-3 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 rounded-md transition-all duration-300 flex items-center justify-center gap-2 shadow-lg">
                 <SpotifyIcon />
                 <span className="font-medium">Spotify</span>
               </button>
@@ -150,10 +285,21 @@ export default function SongResult({ result }: SongResultProps) {
               <button className="px-4 py-3 bg-transparent border border-gray-600 hover:border-gray-400 rounded-md transition-all duration-300 flex items-center justify-center gap-2">
                 <WyncMusicIcon />
                 <span className="font-medium">Wynk</span>
-              </button>
+              </button> */}
+              
             </div>
-            
-            
+            <SongLinks 
+  songName={result?.result?.title || ""}
+  artistName={
+    result?.result?.subtitle ||
+    result?.result?.metadata?.[0]?.text || ""
+  }
+/>
+
+
+
+
+
           </motion.div>
         </div>
       </main>

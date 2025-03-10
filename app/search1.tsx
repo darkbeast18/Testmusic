@@ -69,8 +69,8 @@ const Search1 = () => {
             <div className="hidden md:block">
               <div className="ml-4 flex items-center space-x-4">
                 <a href="/" className="text-white hover:bg-blue-500 hover:text-black rounded-lg p-2">Home</a>
-                <a href="/" className="text-white hover:bg-blue-500 hover:text-black rounded-lg p-2">Search</a>
-                <a href="/" className="text-white hover:bg-blue-500 hover:text-black rounded-lg p-2">Top Tracks Across Globe</a>
+                <a href="https://music.apple.com/in/search" className="text-white hover:bg-blue-500 hover:text-black rounded-lg p-2">Search</a>
+                <a href="https://www.shazam.com/charts/top-200/world" className="text-white hover:bg-blue-500 hover:text-black rounded-lg p-2">Top Tracks Across Globe</a>
               </div>
             </div>
           </div>
